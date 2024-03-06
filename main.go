@@ -130,7 +130,7 @@ func main() {
 		}
 		time_game--
 	})
-	s.Every(2).Minute().Do(func() {
+	s.Every(1).Minute().Do(func() {
 		log.Println("RUNNING 2 MINUTE CHECK DB")
 		loop_statusrunning(envCompany)
 	})
@@ -162,7 +162,7 @@ func loop_statusrunning(idcompany string) {
 
 		err = row.Scan(&idtransaksidetail_db, &idtransaksi_db, &nomor_db, &bet_db, &multiplier_db, &username_client_db)
 		helpers.ErrorCheck(err)
-		prize_2D := _GetInvoiceInfo(idcompany, idtransaksi_db)
+		prize_2D := _GetInvoiceInfo(strings.ToLower(idcompany), idtransaksi_db)
 
 		if prize_2D != "" {
 			invoice = idtransaksi_db
@@ -432,7 +432,7 @@ func _GetInvoiceInfo(idcompany, idinvoice string) string {
 	sql_select += "resultwigo "
 	sql_select += "FROM " + tbl_trx_transaksi + " "
 	sql_select += "WHERE idtransaksi='" + idinvoice + "' "
-	sql_select += "AND resultwigo='' "
+	sql_select += "AND resultwigo !='' "
 
 	row := con.QueryRowContext(ctx, sql_select)
 	switch e := row.Scan(&result); e {
@@ -441,7 +441,6 @@ func _GetInvoiceInfo(idcompany, idinvoice string) string {
 	default:
 		helpers.ErrorCheck(e)
 	}
-
 	return result
 }
 func _GetTotalBetWin_Transaksi(table, idtransaksi string) (int, int) {
