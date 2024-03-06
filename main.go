@@ -128,7 +128,7 @@ func main() {
 				fmt.Printf("%s:%.2d:%s:%s\n", invoice, time_game%60, time_status, game_status)
 				senddata(data_send)
 			}
-			time.Sleep(1 * time.Second)
+			time.Sleep(2 * time.Second)
 			time_game--
 		} else {
 			resultredis, flag_config := helpers.GetRedis(fieldconfig_redis)
