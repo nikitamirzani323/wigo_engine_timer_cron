@@ -130,7 +130,7 @@ func main() {
 		}
 		time_game--
 	})
-	s.Every(1).Minute().Do(func() {
+	s.Every(2).Minute().Do(func() {
 		log.Println("RUNNING 2 MINUTE CHECK DB")
 		loop_statusrunning(envCompany)
 	})
