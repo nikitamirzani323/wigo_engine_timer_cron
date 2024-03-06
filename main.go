@@ -264,7 +264,7 @@ func Save_transaksi(idcompany, idcurr string) string {
 			)
 		`
 
-		field_column := tbl_trx_transaksi + tglnow.Format("YYYY") + tglnow.Format("MM")
+		field_column := tbl_trx_transaksi + tglnow.Format("YYYY") + tglnow.Format("MM") + tglnow.Format("DD")
 		idrecord_counter := models.Get_counter(field_column)
 		idrecrodparent_value := tglnow.Format("YY") + tglnow.Format("MM") + tglnow.Format("DD") + tglnow.Format("HH") + strconv.Itoa(idrecord_counter)
 		date_transaksi := tglnow.Format("YYYY-MM-DD HH:mm:ss")
