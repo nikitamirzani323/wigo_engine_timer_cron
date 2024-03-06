@@ -84,7 +84,7 @@ func main() {
 			time_status = "LOCK"
 			invoice = ""
 			data_send = invoice + "|0|" + time_status + "|" + game_status
-			fmt.Printf("%s:%.2d:%s:%s\r", invoice, time_game%60, time_status, game_status)
+			fmt.Printf("%s:%.2d:%s:%s\n", invoice, time_game%60, time_status, game_status)
 			senddata(data_send)
 
 			flag_compiledata = Update_transaksi(strings.ToLower(envCompany))
@@ -125,7 +125,7 @@ func main() {
 
 			//invoice|time|status
 			data_send = invoice + "|" + strconv.Itoa(time_game%60) + "|0|" + time_status + "|" + game_status
-			fmt.Printf("%s:%.2d:%s:%s\r", invoice, time_game%60, time_status, game_status)
+			fmt.Printf("%s:%.2d:%s:%s\n", invoice, time_game%60, time_status, game_status)
 			senddata(data_send)
 		}
 		time_game--
