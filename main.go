@@ -89,7 +89,7 @@ func main() {
 				senddata(data_send)
 
 				flag_compiledata = Update_transaksi(strings.ToLower(envCompany))
-				time.Sleep(30 * time.Second)
+				time.Sleep(3 * time.Second)
 				if flag_compiledata {
 					invoice = Save_transaksi(strings.ToLower(envCompany), envCurr)
 
