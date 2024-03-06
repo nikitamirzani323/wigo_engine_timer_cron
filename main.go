@@ -78,57 +78,63 @@ func main() {
 
 	s := gocron.NewScheduler(local)
 	s.Every(1).Seconds().Do(func() {
-		if time_game < 0 { //IDLE
-			flag_compiledata := false
-			time_game = 0
-			time_status = "LOCK"
-			invoice = ""
-			data_send = invoice + "|0|" + time_status + "|" + game_status
-			fmt.Printf("%s:%.2d:%s:%s\n", invoice, time_game%60, time_status, game_status)
-			senddata(data_send)
-
-			flag_compiledata = Update_transaksi(strings.ToLower(envCompany))
-			time.Sleep(30 * time.Second)
-			if flag_compiledata {
-				invoice = Save_transaksi(strings.ToLower(envCompany), envCurr)
-
-				resultredis, flag_config := helpers.GetRedis(fieldconfig_redis)
-				jsonredis := []byte(resultredis)
-				timeRD, _ := jsonparser.GetInt(jsonredis, "time")
-				maintenanceRD, _ := jsonparser.GetString(jsonredis, "maintenance")
-
-				if !flag_config {
-					fmt.Println("CONFIG DATABASE")
-					time_game_DB, game_status_DB := _GetConf(envCompany)
-					obj.Time = time_game_DB
-					obj.Maintenance = game_status_DB
-					helpers.SetRedis(fieldconfig_redis, obj, 60*time.Minute)
-					time_game = time_game_DB
-					game_status = game_status_DB
-
-				} else {
-					fmt.Println("CONFIG CACHE")
-					time_game = int(timeRD)
-					game_status = maintenanceRD
-				}
-				fmt.Println(invoice)
-				fmt.Println(time_game)
-				fmt.Println(game_status)
-				fmt.Println("")
-			}
-		} else {
-			if invoice == "" {
+		if game_status == "ONLINE" {
+			if time_game < 0 { //IDLE
+				flag_compiledata := false
+				time_game = 0
 				time_status = "LOCK"
-			} else {
-				time_status = "OPEN"
-			}
+				invoice = ""
+				data_send = invoice + "|0|" + time_status + "|" + game_status
+				fmt.Printf("%s:%.2d:%s:%s\n", invoice, time_game%60, time_status, game_status)
+				senddata(data_send)
 
-			//invoice|time|status
-			data_send = invoice + "|" + strconv.Itoa(time_game%60) + "|0|" + time_status + "|" + game_status
-			fmt.Printf("%s:%.2d:%s:%s\n", invoice, time_game%60, time_status, game_status)
+				flag_compiledata = Update_transaksi(strings.ToLower(envCompany))
+				time.Sleep(30 * time.Second)
+				if flag_compiledata {
+					invoice = Save_transaksi(strings.ToLower(envCompany), envCurr)
+
+					resultredis, flag_config := helpers.GetRedis(fieldconfig_redis)
+					jsonredis := []byte(resultredis)
+					timeRD, _ := jsonparser.GetInt(jsonredis, "time")
+					maintenanceRD, _ := jsonparser.GetString(jsonredis, "maintenance")
+
+					if !flag_config {
+						fmt.Println("CONFIG DATABASE")
+						time_game_DB, game_status_DB := _GetConf(envCompany)
+						obj.Time = time_game_DB
+						obj.Maintenance = game_status_DB
+						helpers.SetRedis(fieldconfig_redis, obj, 60*time.Minute)
+						time_game = time_game_DB
+						game_status = game_status_DB
+
+					} else {
+						fmt.Println("CONFIG CACHE")
+						time_game = int(timeRD)
+						game_status = maintenanceRD
+					}
+					fmt.Println(invoice)
+					fmt.Println(time_game)
+					fmt.Println(game_status)
+					fmt.Println("")
+				}
+			} else {
+				if invoice == "" {
+					time_status = "LOCK"
+				} else {
+					time_status = "OPEN"
+				}
+				//invoice|time|status
+				data_send = invoice + "|" + strconv.Itoa(time_game%60) + "|" + time_status + "|" + game_status
+				fmt.Printf("%s:%.2d:%s:%s\n", invoice, time_game%60, time_status, game_status)
+				senddata(data_send)
+			}
+			time_game--
+		} else {
+			data_send = "|0|LOCK|" + game_status
+			fmt.Printf("%s:%.2d:%s:%s\n", "", 0, "LOCK", game_status)
 			senddata(data_send)
 		}
-		time_game--
+
 	})
 	s.Every(2).Minute().Do(func() {
 		log.Println("RUNNING 2 MINUTE CHECK DB")
