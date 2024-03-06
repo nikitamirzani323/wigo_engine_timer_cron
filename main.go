@@ -128,8 +128,29 @@ func main() {
 				fmt.Printf("%s:%.2d:%s:%s\n", invoice, time_game%60, time_status, game_status)
 				senddata(data_send)
 			}
+			time.Sleep(1 * time.Second)
 			time_game--
 		} else {
+			resultredis, flag_config := helpers.GetRedis(fieldconfig_redis)
+			jsonredis := []byte(resultredis)
+			timeRD, _ := jsonparser.GetInt(jsonredis, "time")
+			maintenanceRD, _ := jsonparser.GetString(jsonredis, "maintenance")
+
+			if !flag_config {
+				fmt.Println("CONFIG DATABASE")
+				time_game_DB, game_status_DB := _GetConf(envCompany)
+				obj.Time = time_game_DB
+				obj.Maintenance = game_status_DB
+				helpers.SetRedis(fieldconfig_redis, obj, 60*time.Minute)
+				time_game = time_game_DB
+				game_status = game_status_DB
+
+			} else {
+				fmt.Println("CONFIG CACHE")
+				time_game = int(timeRD)
+				game_status = maintenanceRD
+			}
+
 			data_send = "|0|LOCK|" + game_status
 			fmt.Printf("%s:%.2d:%s:%s\n", "", 0, "LOCK", game_status)
 			senddata(data_send)
