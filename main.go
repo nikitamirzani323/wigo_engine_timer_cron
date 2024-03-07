@@ -23,6 +23,7 @@ import (
 var invoice = ""
 var time_status = "LOCK"
 var game_status = "OFFLINE"
+var operator_status = "N"
 var data_send = ""
 
 const invoice_client_redis = "CLIENT_LISTINVOICE"
@@ -53,6 +54,7 @@ func main() {
 	type Configure struct {
 		Time        int    `json:"time"`
 		Maintenance string `json:"maintenance"`
+		Operator    string `json:"operator"`
 	}
 	var obj Configure
 
@@ -60,12 +62,14 @@ func main() {
 	jsonredis := []byte(resultredis)
 	timeRD, _ := jsonparser.GetInt(jsonredis, "time")
 	maintenanceRD, _ := jsonparser.GetString(jsonredis, "maintenance")
+	operatorRD, _ := jsonparser.GetString(jsonredis, "operator")
 
 	if !flag_config {
 		fmt.Println("CONFIG DATABASE")
-		time_game_DB, game_status_DB := _GetConf(envCompany)
+		time_game_DB, game_status_DB, operator_DB := _GetConf(envCompany)
 		obj.Time = time_game_DB
 		obj.Maintenance = game_status_DB
+		obj.Operator = operator_DB
 		helpers.SetRedis(fieldconfig_redis, obj, 60*time.Minute)
 		time_game = time_game_DB
 		game_status = game_status_DB
@@ -74,6 +78,7 @@ func main() {
 		fmt.Println("CONFIG CACHE")
 		time_game = int(timeRD)
 		game_status = maintenanceRD
+		operator_status = operatorRD
 	}
 
 	s := gocron.NewScheduler(local)
@@ -97,12 +102,14 @@ func main() {
 					jsonredis := []byte(resultredis)
 					timeRD, _ := jsonparser.GetInt(jsonredis, "time")
 					maintenanceRD, _ := jsonparser.GetString(jsonredis, "maintenance")
+					operatorRD, _ := jsonparser.GetString(jsonredis, "operator")
 
 					if !flag_config {
 						fmt.Println("CONFIG DATABASE")
-						time_game_DB, game_status_DB := _GetConf(envCompany)
+						time_game_DB, game_status_DB, operator_DB := _GetConf(envCompany)
 						obj.Time = time_game_DB
 						obj.Maintenance = game_status_DB
+						obj.Operator = operator_DB
 						helpers.SetRedis(fieldconfig_redis, obj, 60*time.Minute)
 						time_game = time_game_DB
 						game_status = game_status_DB
@@ -111,10 +118,12 @@ func main() {
 						fmt.Println("CONFIG CACHE")
 						time_game = int(timeRD)
 						game_status = maintenanceRD
+						operator_status = operatorRD
 					}
 					fmt.Println(invoice)
 					fmt.Println(time_game)
 					fmt.Println(game_status)
+					fmt.Println(operator_status)
 					fmt.Println("")
 				}
 			} else {
@@ -134,15 +143,18 @@ func main() {
 			jsonredis := []byte(resultredis)
 			timeRD, _ := jsonparser.GetInt(jsonredis, "time")
 			maintenanceRD, _ := jsonparser.GetString(jsonredis, "maintenance")
+			operatorRD, _ := jsonparser.GetString(jsonredis, "operator")
 
 			if !flag_config {
 				fmt.Println("CONFIG DATABASE")
-				time_game_DB, game_status_DB := _GetConf(envCompany)
+				time_game_DB, game_status_DB, operator_DB := _GetConf(envCompany)
 				obj.Time = time_game_DB
 				obj.Maintenance = game_status_DB
+				obj.Operator = operator_DB
 				helpers.SetRedis(fieldconfig_redis, obj, 60*time.Minute)
 				time_game = time_game_DB
 				game_status = game_status_DB
+				operator_status = operatorRD
 
 			} else {
 				fmt.Println("CONFIG CACHE")
@@ -394,20 +406,21 @@ func senddata(data, company string) {
 	key := "payload" + "_" + strings.ToLower(company)
 	helpers.SetPublish(key, data)
 }
-func _GetConf(idcompany string) (int, string) {
+func _GetConf(idcompany string) (int, string, string) {
 	con := db.CreateCon()
 	ctx := context.Background()
 
 	time := 0
 	maintenance := "N"
+	operator := "N"
 
 	sql_select := ""
 	sql_select += "SELECT "
-	sql_select += "conf_2digit_30_time, conf_2digit_30_maintenance "
+	sql_select += "conf_2digit_30_time, conf_2digit_30_maintenance, conf_2digit_30_operator "
 	sql_select += "FROM " + configs.DB_tbl_mst_company_config + " "
 	sql_select += "WHERE idcompany='" + idcompany + "' "
 	row := con.QueryRowContext(ctx, sql_select)
-	switch e := row.Scan(&time, &maintenance); e {
+	switch e := row.Scan(&time, &maintenance, &operator); e {
 	case sql.ErrNoRows:
 	case nil:
 	default:
@@ -418,7 +431,7 @@ func _GetConf(idcompany string) (int, string) {
 	} else {
 		maintenance = "ONLINE"
 	}
-	return time, maintenance
+	return time, maintenance, operator
 }
 func _GetInvoice(idcompany string) string {
 	con := db.CreateCon()
