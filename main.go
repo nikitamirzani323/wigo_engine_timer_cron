@@ -21,10 +21,12 @@ import (
 )
 
 var invoice = ""
+var invoice_agen = ""
 var time_status = "LOCK"
 var game_status = "OFFLINE"
 var operator_status = "N"
 var data_send = ""
+var data_send_agen = ""
 
 const invoice_client_redis = "CLIENT_LISTINVOICE"
 const invoice_result_redis = "CLIENT_RESULT"
@@ -50,6 +52,7 @@ func main() {
 	time_game := 0
 	fieldconfig_redis := "CONFIG_" + strings.ToLower(envCompany)
 	invoice = Save_transaksi(strings.ToLower(envCompany), envCurr)
+	invoice_agen = invoice
 
 	type Configure struct {
 		Time        int    `json:"time"`
@@ -91,14 +94,17 @@ func main() {
 				time_status = "LOCK"
 				invoice = ""
 				data_send = invoice + "|0|" + time_status + "|" + game_status
+				data_send_agen = invoice_agen + "|OPEN"
 				fmt.Printf("%s:%.2d:%s:%s\n", invoice, time_game%60, time_status, game_status)
 				senddata(data_send, envCompany)
+				senddata_agen(data_send_agen, envCompany)
 
 				if operator_status == "N" { // tanpa operator
 					flag_compiledata = Update_transaksi(strings.ToLower(envCompany))
 					time.Sleep(3 * time.Second)
 					if flag_compiledata {
 						invoice = Save_transaksi(strings.ToLower(envCompany), envCurr)
+						invoice_agen = invoice
 
 						resultredis, flag_config := helpers.GetRedis(fieldconfig_redis)
 						jsonredis := []byte(resultredis)
@@ -410,6 +416,10 @@ func Update_transaksi(idcompany string) bool {
 }
 func senddata(data, company string) {
 	key := "payload" + "_" + strings.ToLower(company)
+	helpers.SetPublish(key, data)
+}
+func senddata_agen(data, company string) {
+	key := "payload" + "_agen_" + strings.ToLower(company)
 	helpers.SetPublish(key, data)
 }
 func _GetConf(idcompany string) (int, string, string) {
