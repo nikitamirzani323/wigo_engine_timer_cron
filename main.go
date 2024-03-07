@@ -73,6 +73,7 @@ func main() {
 		helpers.SetRedis(fieldconfig_redis, obj, 60*time.Minute)
 		time_game = time_game_DB
 		game_status = game_status_DB
+		operator_status = operator_DB
 
 	} else {
 		fmt.Println("CONFIG CACHE")
@@ -93,39 +94,44 @@ func main() {
 				fmt.Printf("%s:%.2d:%s:%s\n", invoice, time_game%60, time_status, game_status)
 				senddata(data_send, envCompany)
 
-				flag_compiledata = Update_transaksi(strings.ToLower(envCompany))
-				time.Sleep(3 * time.Second)
-				if flag_compiledata {
-					invoice = Save_transaksi(strings.ToLower(envCompany), envCurr)
+				if operator_status == "N" { // tanpa operator
+					flag_compiledata = Update_transaksi(strings.ToLower(envCompany))
+					time.Sleep(3 * time.Second)
+					if flag_compiledata {
+						invoice = Save_transaksi(strings.ToLower(envCompany), envCurr)
 
-					resultredis, flag_config := helpers.GetRedis(fieldconfig_redis)
-					jsonredis := []byte(resultredis)
-					timeRD, _ := jsonparser.GetInt(jsonredis, "time")
-					maintenanceRD, _ := jsonparser.GetString(jsonredis, "maintenance")
-					operatorRD, _ := jsonparser.GetString(jsonredis, "operator")
+						resultredis, flag_config := helpers.GetRedis(fieldconfig_redis)
+						jsonredis := []byte(resultredis)
+						timeRD, _ := jsonparser.GetInt(jsonredis, "time")
+						maintenanceRD, _ := jsonparser.GetString(jsonredis, "maintenance")
+						operatorRD, _ := jsonparser.GetString(jsonredis, "operator")
 
-					if !flag_config {
-						fmt.Println("CONFIG DATABASE")
-						time_game_DB, game_status_DB, operator_DB := _GetConf(envCompany)
-						obj.Time = time_game_DB
-						obj.Maintenance = game_status_DB
-						obj.Operator = operator_DB
-						helpers.SetRedis(fieldconfig_redis, obj, 60*time.Minute)
-						time_game = time_game_DB
-						game_status = game_status_DB
+						if !flag_config {
+							fmt.Println("CONFIG DATABASE")
+							time_game_DB, game_status_DB, operator_DB := _GetConf(envCompany)
+							obj.Time = time_game_DB
+							obj.Maintenance = game_status_DB
+							obj.Operator = operator_DB
+							helpers.SetRedis(fieldconfig_redis, obj, 60*time.Minute)
+							time_game = time_game_DB
+							game_status = game_status_DB
 
-					} else {
-						fmt.Println("CONFIG CACHE")
-						time_game = int(timeRD)
-						game_status = maintenanceRD
-						operator_status = operatorRD
+						} else {
+							fmt.Println("CONFIG CACHE")
+							time_game = int(timeRD)
+							game_status = maintenanceRD
+							operator_status = operatorRD
+						}
+						fmt.Println(invoice)
+						fmt.Println(time_game)
+						fmt.Println(game_status)
+						fmt.Println(operator_status)
+						fmt.Println("")
 					}
-					fmt.Println(invoice)
-					fmt.Println(time_game)
-					fmt.Println(game_status)
-					fmt.Println(operator_status)
-					fmt.Println("")
+				} else { // dengan operator
+
 				}
+
 			} else {
 				if invoice == "" {
 					time_status = "LOCK"
