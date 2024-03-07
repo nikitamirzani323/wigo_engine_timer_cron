@@ -86,7 +86,7 @@ func main() {
 				invoice = ""
 				data_send = invoice + "|0|" + time_status + "|" + game_status
 				fmt.Printf("%s:%.2d:%s:%s\n", invoice, time_game%60, time_status, game_status)
-				senddata(data_send)
+				senddata(data_send, envCompany)
 
 				flag_compiledata = Update_transaksi(strings.ToLower(envCompany))
 				time.Sleep(3 * time.Second)
@@ -126,7 +126,7 @@ func main() {
 				//invoice|time|status
 				data_send = invoice + "|" + strconv.Itoa(time_game%60) + "|" + time_status + "|" + game_status
 				fmt.Printf("%s:%.2d:%s:%s\n", invoice, time_game%60, time_status, game_status)
-				senddata(data_send)
+				senddata(data_send, envCompany)
 			}
 			time.Sleep(2 * time.Second)
 			time_game--
@@ -153,7 +153,7 @@ func main() {
 
 			data_send = "|0|LOCK|" + game_status
 			fmt.Printf("%s:%.2d:%s:%s\n", "", 0, "LOCK", game_status)
-			senddata(data_send)
+			senddata(data_send, envCompany)
 		}
 
 	})
@@ -391,8 +391,9 @@ func Update_transaksi(idcompany string) bool {
 	}
 	return flag_compile
 }
-func senddata(data string) {
-	helpers.SetPublish("payload", data)
+func senddata(data, company string) {
+	key := "payload" + "_" + strings.ToLower(company)
+	helpers.SetPublish(key, data)
 }
 func _GetConf(idcompany string) (int, string) {
 	con := db.CreateCon()
