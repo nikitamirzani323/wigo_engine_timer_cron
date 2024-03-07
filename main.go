@@ -77,7 +77,7 @@ func main() {
 	}
 
 	s := gocron.NewScheduler(local)
-	s.Every(1).Seconds().Do(func() {
+	s.Every(2).Seconds().Do(func() {
 		if game_status == "ONLINE" {
 			if time_game < 0 { //IDLE
 				flag_compiledata := false
@@ -128,7 +128,6 @@ func main() {
 				fmt.Printf("%s:%.2d:%s:%s\n", invoice, time_game%60, time_status, game_status)
 				senddata(data_send, envCompany)
 			}
-			time.Sleep(2 * time.Second)
 			time_game--
 		} else {
 			resultredis, flag_config := helpers.GetRedis(fieldconfig_redis)
