@@ -51,8 +51,6 @@ func main() {
 	envCurr := os.Getenv("DB_CONF_CURR")
 	time_game := 0
 	fieldconfig_redis := "CONFIG_" + strings.ToLower(envCompany)
-	invoice = Save_transaksi(strings.ToLower(envCompany), envCurr)
-	invoice_agen = invoice
 
 	type Configure struct {
 		Time        int    `json:"time"`
@@ -84,14 +82,44 @@ func main() {
 		game_status = maintenanceRD
 		operator_status = operatorRD
 	}
+	if operator_status == "N" {
+		invoice = Save_transaksi(strings.ToLower(envCompany), envCurr)
+		invoice_agen = invoice
+	} else {
 
+		time_game = 0
+	}
 	s := gocron.NewScheduler(local)
 	s.Every(2).Seconds().Do(func() {
+		resultredis, flag_config := helpers.GetRedis(fieldconfig_redis)
+		jsonredis := []byte(resultredis)
+		maintenanceRD, _ := jsonparser.GetString(jsonredis, "maintenance")
+		operatorRD, _ := jsonparser.GetString(jsonredis, "operator")
+
+		if !flag_config {
+			fmt.Println("CONFIG DATABASE")
+			time_game_DB, game_status_DB, operator_DB := _GetConf(envCompany)
+			obj.Time = time_game_DB
+			obj.Maintenance = game_status_DB
+			obj.Operator = operator_DB
+			helpers.SetRedis(fieldconfig_redis, obj, 60*time.Minute)
+			game_status = game_status_DB
+			operator_status = operatorRD
+
+		} else {
+			fmt.Println("CONFIG CACHE")
+			game_status = maintenanceRD
+			operator_status = operatorRD
+		}
+
 		if game_status == "ONLINE" {
 			if time_game < 0 { //IDLE
 				flag_compiledata := false
 				time_game = 0
 				time_status = "LOCK"
+				if invoice != "" {
+					invoice_agen = invoice
+				}
 				invoice = ""
 				data_send = invoice + "|0|" + time_status + "|" + game_status
 				data_send_agen = invoice_agen + "|OPEN"
@@ -135,7 +163,27 @@ func main() {
 						fmt.Println("")
 					}
 				} else { // dengan operator
+					fieldconfig_redis := "TIMER_" + strings.ToLower(envCompany)
+					fmt.Println("Invoice kosong")
+					resultredis_timer, flag_timer := helpers.GetRedis(fieldconfig_redis)
+					jsonredis_timer := []byte(resultredis_timer)
+					timeRD, _ := jsonparser.GetInt(jsonredis_timer, "time")
+					invoiceRD, _ := jsonparser.GetString(jsonredis_timer, "invoice")
 
+					if flag_timer {
+						fmt.Println("TIMER_ CACHE")
+						time_game = int(timeRD)
+						invoice = invoiceRD
+						invoice_agen = ""
+						val_transaksi2d30s2 := helpers.DeleteRedis(fieldconfig_redis)
+						fmt.Printf("Redis Delete TIMER : %d", val_transaksi2d30s2)
+
+						data_send_agen = invoice_agen + "|CLOSED"
+						senddata_agen(data_send_agen, envCompany)
+					} else {
+						data_send_agen = invoice_agen + "|OPEN"
+						senddata_agen(data_send_agen, envCompany)
+					}
 				}
 
 			} else {

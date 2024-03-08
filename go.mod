@@ -8,6 +8,7 @@ require (
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/go-co-op/gocron v1.37.0 // indirect
 	github.com/go-co-op/gocron/v2 v2.2.4 // indirect
+	github.com/go-redis/redis v6.15.9+incompatible // indirect
 	github.com/go-redis/redis/v8 v8.11.5 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/jinzhu/gorm v1.9.16 // indirect
