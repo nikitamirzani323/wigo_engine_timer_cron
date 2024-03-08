@@ -86,7 +86,6 @@ func main() {
 		invoice = Save_transaksi(strings.ToLower(envCompany), envCurr)
 		invoice_agen = invoice
 	} else {
-
 		time_game = 0
 	}
 	s := gocron.NewScheduler(local)
