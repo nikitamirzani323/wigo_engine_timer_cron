@@ -30,6 +30,7 @@ var data_send_agen = ""
 
 const invoice_client_redis = "CLIENT_LISTINVOICE"
 const invoice_result_redis = "CLIENT_RESULT"
+const invoice_agen_redis = "LISTINVOICE_2D30S_AGEN"
 
 func main() {
 	local, err_local := time.LoadLocation("Asia/Jakarta")
@@ -457,8 +458,14 @@ func Update_transaksi(idcompany string) bool {
 		key_redis_result := invoice_result_redis + "_" + strings.ToLower(idcompany)
 		val_result := helpers.DeleteRedis(key_redis_result)
 		fmt.Println("")
-		fmt.Printf("Redis Delete RESULT : %d - %s \r", val_result, key_redis_result)
+		fmt.Printf("Redis Delete RESULT : %d - %s \n", val_result, key_redis_result)
 		fmt.Println("")
+		for i := 0; i <= 1000; i = i + 250 {
+			//LISTINVOICE_2D30S_AGEN_nuke_0_
+			key_redis_ageninvoice := invoice_agen_redis + "_" + strings.ToLower(idcompany) + "_" + strconv.Itoa(i)
+			val_result := helpers.DeleteRedis(key_redis_ageninvoice)
+			fmt.Printf("Redis Delete AGEN INVOICE : %d - %s \n", val_result, key_redis_ageninvoice)
+		}
 	}
 	return flag_compile
 }
