@@ -244,7 +244,7 @@ func loop_statusrunning(idcompany string) {
 	_, tbl_trx_transaksi, tbl_trx_transaksidetail, _ := models.Get_mappingdatabase(idcompany)
 
 	sql_select_detail := `SELECT 
-					idtransaksidetail,idtransaksi, nomor, bet, multiplier, username_client 
+					idtransaksidetail,idtransaksi, nomor,tipebet, bet, multiplier, username_client 
 					FROM ` + tbl_trx_transaksidetail + `  
 					WHERE status_transaksidetail='RUNNING'  
 					`
@@ -253,18 +253,18 @@ func loop_statusrunning(idcompany string) {
 	helpers.ErrorCheck(err)
 	for row.Next() {
 		var (
-			bet_db                                                             int
-			multiplier_db                                                      float64
-			idtransaksidetail_db, idtransaksi_db, nomor_db, username_client_db string
+			bet_db                                                                         int
+			multiplier_db                                                                  float64
+			idtransaksidetail_db, idtransaksi_db, nomor_db, tipebet_db, username_client_db string
 		)
 
-		err = row.Scan(&idtransaksidetail_db, &idtransaksi_db, &nomor_db, &bet_db, &multiplier_db, &username_client_db)
+		err = row.Scan(&idtransaksidetail_db, &idtransaksi_db, &nomor_db, &tipebet_db, &bet_db, &multiplier_db, &username_client_db)
 		helpers.ErrorCheck(err)
 		prize_2D := _GetInvoiceInfo(strings.ToLower(idcompany), idtransaksi_db)
 
 		if prize_2D != "" {
 			invoice = idtransaksi_db
-			status_client := _rumuswigo(nomor_db, prize_2D)
+			status_client := _rumuswigo(tipebet_db, nomor_db, prize_2D)
 			win := 0
 			if status_client == "WIN" {
 				win = bet_db + int(float64(bet_db)*multiplier_db)
