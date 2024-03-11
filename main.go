@@ -380,7 +380,7 @@ func Update_transaksi(idcompany string) bool {
 			ctx := context.Background()
 			flag_detail := false
 			sql_select_detail := `SELECT 
-					idtransaksidetail , nomor, bet, multiplier, username_client 
+					idtransaksidetail , nomor, tipebet,bet, multiplier, username_client 
 					FROM ` + tbl_trx_transaksidetail + `  
 					WHERE status_transaksidetail='RUNNING'  
 					AND idtransaksi='` + id_invoice + `'  `
@@ -389,15 +389,15 @@ func Update_transaksi(idcompany string) bool {
 			helpers.ErrorCheck(err)
 			for row.Next() {
 				var (
-					bet_db                                             int
-					multiplier_db                                      float64
-					idtransaksidetail_db, nomor_db, username_client_db string
+					bet_db                                                         int
+					multiplier_db                                                  float64
+					idtransaksidetail_db, nomor_db, tipebet_db, username_client_db string
 				)
 
-				err = row.Scan(&idtransaksidetail_db, &nomor_db, &bet_db, &multiplier_db, &username_client_db)
+				err = row.Scan(&idtransaksidetail_db, &nomor_db, &tipebet_db, &bet_db, &multiplier_db, &username_client_db)
 				helpers.ErrorCheck(err)
 
-				status_client := _rumuswigo(nomor_db, prize_2D)
+				status_client := _rumuswigo(tipebet_db, nomor_db, prize_2D)
 				win := 0
 				if status_client == "WIN" {
 					win = bet_db + int(float64(bet_db)*multiplier_db)
@@ -596,10 +596,121 @@ func _GetTotalMember_Transaksi(table, idtransaksi string) int {
 
 	return total_member
 }
-func _rumuswigo(nomorclient, nomorkeluaran string) string {
+func _rumuswigo(tipebet, nomorclient, nomorkeluaran string) string {
 	result := "LOSE"
-	if nomorclient == nomorkeluaran {
-		result = "WIN"
+
+	switch tipebet {
+	case "ANGKA":
+		if nomorclient == nomorkeluaran {
+			result = "WIN"
+		}
+	case "REDBLACK":
+		keluaran_ganjilgenap := _genapganjil(nomorkeluaran)
+		keluaran_besarkecil := _besarkecil(nomorkeluaran)
+
+		if nomorclient == keluaran_ganjilgenap {
+			result = "WIN"
+		}
+		if nomorclient == keluaran_besarkecil {
+			result = "WIN"
+		}
+	case "LINE":
+		keluaran_line := _line(nomorkeluaran)
+		if nomorclient == keluaran_line {
+			result = "WIN"
+		}
+	}
+
+	return result
+}
+func _genapganjil(nomorkeluaran string) string {
+	nomor_generator := ""
+	result := ""
+	for i := 0; i <= 99; i++ {
+		if i < 10 {
+			nomor_generator = "0" + strconv.Itoa(i)
+		} else {
+			nomor_generator = strconv.Itoa(i)
+		}
+		if i%2 == 0 {
+			if nomorkeluaran == nomor_generator {
+				result = "GENAP"
+				break
+			}
+
+		} else {
+			if nomorkeluaran == nomor_generator {
+				result = "GANJIL"
+				break
+			}
+		}
+	}
+	return result
+}
+func _besarkecil(nomorkeluaran string) string {
+	nomor_generator := ""
+	result := ""
+	for i := 0; i <= 99; i++ {
+		if i < 10 {
+			nomor_generator = "0" + strconv.Itoa(i)
+		} else {
+			nomor_generator = strconv.Itoa(i)
+		}
+		if i < 50 {
+			if nomorkeluaran == nomor_generator {
+				result = "KECIL"
+				break
+			}
+
+		} else {
+			if nomorkeluaran == nomor_generator {
+				result = "BESAR"
+				break
+			}
+		}
+	}
+	return result
+}
+func _line(nomorkeluaran string) string {
+	nomor_generator := ""
+	result := ""
+	for i := 0; i <= 99; i++ {
+		if i < 10 {
+			nomor_generator = "0" + strconv.Itoa(i)
+		} else {
+			nomor_generator = strconv.Itoa(i)
+		}
+		if i < 19 {
+			if nomorkeluaran == nomor_generator {
+				result = "LINE1"
+				break
+			}
+
+		}
+		if i > 19 && i < 40 {
+			if nomorkeluaran == nomor_generator {
+				result = "LINE2"
+				break
+			}
+		}
+		if i > 39 && i < 60 {
+			if nomorkeluaran == nomor_generator {
+				result = "LINE3"
+				break
+			}
+		}
+		if i > 59 && i < 80 {
+			if nomorkeluaran == nomor_generator {
+				result = "LINE4"
+				break
+			}
+		}
+		if i > 80 && i < 100 {
+			if nomorkeluaran == nomor_generator {
+				result = "LINE5"
+				break
+			}
+		}
 	}
 	return result
 }
