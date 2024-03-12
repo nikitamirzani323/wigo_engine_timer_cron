@@ -466,6 +466,19 @@ func Update_transaksi(idcompany string) bool {
 			val_result := helpers.DeleteRedis(key_redis_ageninvoice)
 			fmt.Printf("Redis Delete AGEN INVOICE : %d - %s \n", val_result, key_redis_ageninvoice)
 		}
+
+		// key_redis_detail := "LISTINVOICE_2D30S_AGEN_nuke_DETAIL_240312231346_WIN"
+		key_redis_detail_win := invoice_agen_redis + "_" + strings.ToLower(idcompany) + "_DETAIL_" + id_invoice + "_WIN"
+		key_redis_detail_lose := invoice_agen_redis + "_" + strings.ToLower(idcompany) + "_DETAIL_" + id_invoice + "_LOSE"
+		key_redis_detail_running := invoice_agen_redis + "_" + strings.ToLower(idcompany) + "_DETAIL_" + id_invoice + "_RUNNING"
+		val_detail_win := helpers.DeleteRedis(key_redis_detail_win)
+		val_detail_lose := helpers.DeleteRedis(key_redis_detail_lose)
+		val_detail_running := helpers.DeleteRedis(key_redis_detail_running)
+		fmt.Println("")
+		fmt.Printf("Redis Delete DETAIL WIN : %d\n", val_detail_win)
+		fmt.Printf("Redis Delete DETAIL LOSE : %d\n", val_detail_lose)
+		fmt.Printf("Redis Delete DETAIL RUNNIN : %d\n", val_detail_running)
+		fmt.Println("")
 	}
 	return flag_compile
 }
