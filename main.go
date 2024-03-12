@@ -462,7 +462,7 @@ func Update_transaksi(idcompany string) bool {
 		fmt.Println("")
 		for i := 0; i <= 1000; i = i + 250 {
 			//LISTINVOICE_2D30S_AGEN_nuke_0_
-			key_redis_ageninvoice := invoice_agen_redis + "_" + strings.ToLower(idcompany) + "_" + strconv.Itoa(i)
+			key_redis_ageninvoice := invoice_agen_redis + "_" + strings.ToLower(idcompany) + "_" + strconv.Itoa(i) + "_"
 			val_result := helpers.DeleteRedis(key_redis_ageninvoice)
 			fmt.Printf("Redis Delete AGEN INVOICE : %d - %s \n", val_result, key_redis_ageninvoice)
 		}
