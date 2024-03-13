@@ -29,10 +29,6 @@ var data_send = ""
 var data_send_agen = ""
 var data_send_savetransaksi = ""
 
-const invoice_client_redis = "CLIENT_LISTINVOICE"
-const invoice_result_redis = "CLIENT_RESULT"
-const invoice_agen_redis = "LISTINVOICE_2D30S_AGEN"
-
 func main() {
 	local, err_local := time.LoadLocation("Asia/Jakarta")
 	if err_local != nil {
@@ -314,7 +310,7 @@ func Save_transaksi(idcompany, idcurr string) string {
 func Update_transaksi(idcompany string) bool {
 	tglnow, _ := goment.New()
 	id_invoice := _GetInvoice(idcompany)
-	prize_2D := helpers.GenerateNumber(2)
+	prize_2D := helpers.Shuffle_nomor()
 	flag_compile := false
 
 	if id_invoice != "" {
