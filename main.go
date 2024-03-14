@@ -24,6 +24,7 @@ var invoice = ""
 var invoice_agen = ""
 var time_status = "LOCK"
 var game_status = "OFFLINE"
+var game_result = ""
 var operator_status = "N"
 var data_send = ""
 var data_send_agen = ""
@@ -118,14 +119,21 @@ func main() {
 					invoice_agen = invoice
 				}
 				invoice = ""
-				data_send = invoice + "|0|" + time_status + "|" + game_status
+				data_send = invoice + "|0|" + time_status + "|" + game_status + "|" + game_result
 				data_send_agen = invoice_agen + "|OPEN"
-				fmt.Printf("%s:%.2d:%s:%s\n", invoice, time_game%60, time_status, game_status)
+				fmt.Printf("%s:%.2d:%s:%s:%s\n", invoice, time_game%60, time_status, game_status, game_result)
 				senddata(data_send, envCompany)
 				senddata_agen(data_send_agen, envCompany)
 
 				if operator_status == "N" { // tanpa operator
-					flag_compiledata = Update_transaksi(strings.ToLower(envCompany))
+					// prize_2D := helpers.Shuffle_nomor()
+					game_result = helpers.Shuffle_nomor()
+					data_send = invoice + "|0|" + time_status + "|" + game_status + "|" + game_result
+					data_send_agen = invoice_agen + "|OPEN"
+					fmt.Printf("%s:%.2d:%s:%s:%s\n", invoice, time_game%60, time_status, game_status, game_result)
+					senddata(data_send, envCompany)
+
+					flag_compiledata = Update_transaksi(strings.ToLower(envCompany), game_result)
 					time.Sleep(3 * time.Second)
 					if flag_compiledata {
 						invoice = Save_transaksi(strings.ToLower(envCompany), envCurr)
@@ -188,10 +196,17 @@ func main() {
 					time_status = "LOCK"
 				} else {
 					time_status = "OPEN"
+					game_result = ""
+				}
+				if time_game < 6 {
+					time_status = "LOCK"
+				} else {
+					time_status = "OPEN"
+					game_result = ""
 				}
 				//invoice|time|status
-				data_send = invoice + "|" + strconv.Itoa(time_game%60) + "|" + time_status + "|" + game_status
-				fmt.Printf("%s:%.2d:%s:%s\n", invoice, time_game%60, time_status, game_status)
+				data_send = invoice + "|" + strconv.Itoa(time_game%60) + "|" + time_status + "|" + game_status + "|" + game_result
+				fmt.Printf("%s:%.2d:%s:%s:%s\n", invoice, time_game%60, time_status, game_status, game_result)
 				senddata(data_send, envCompany)
 			}
 			time_game--
@@ -307,10 +322,10 @@ func Save_transaksi(idcompany, idcurr string) string {
 
 	return id_invoice
 }
-func Update_transaksi(idcompany string) bool {
+func Update_transaksi(idcompany, prize2d string) bool {
 	tglnow, _ := goment.New()
 	id_invoice := _GetInvoice(idcompany)
-	prize_2D := helpers.Shuffle_nomor()
+
 	flag_compile := false
 
 	if id_invoice != "" {
@@ -325,14 +340,14 @@ func Update_transaksi(idcompany string) bool {
 			`
 
 		flag_update, msg_update := models.Exec_SQL(sql_update, tbl_trx_transaksi, "UPDATE",
-			prize_2D, "CLOSED",
+			prize2d, "CLOSED",
 			"SYSTEM", tglnow.Format("YYYY-MM-DD HH:mm:ss"), id_invoice)
 
 		if flag_update {
 			data_send_savetransaksi = ""
 			fmt.Println("Send Data ke engine save transaksi")
-			data_send_savetransaksi = id_invoice + "|" + prize_2D + "|" + idcompany
-			fmt.Printf("%s:%s:%s\n", id_invoice, prize_2D, idcompany)
+			data_send_savetransaksi = id_invoice + "|" + prize2d + "|" + idcompany
+			fmt.Printf("%s:%s:%s\n", id_invoice, prize2d, idcompany)
 			senddata_enginesave(data_send_savetransaksi, idcompany)
 			flag_compile = true
 		} else {
