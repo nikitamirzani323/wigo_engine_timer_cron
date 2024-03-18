@@ -126,6 +126,7 @@ func main() {
 				senddata_agen(data_send_agen, envCompany)
 
 				if operator_status == "N" { // tanpa operator
+					fmt.Println("ONLINE AUTOMATION")
 					// prize_2D := helpers.Shuffle_nomor()
 					game_result = helpers.Shuffle_nomor()
 					data_send = invoice + "|0|" + time_status + "|" + game_status + "|" + game_result
@@ -161,22 +162,25 @@ func main() {
 							game_status = maintenanceRD
 							operator_status = operatorRD
 						}
-						fmt.Println(invoice)
-						fmt.Println(time_game)
-						fmt.Println(game_status)
-						fmt.Println(operator_status)
-						fmt.Println("")
 					}
 				} else { // dengan operator
+					fmt.Println("ONLINE OPERATOR")
 					fieldconfig_redis := "TIMER_" + strings.ToLower(envCompany)
-					fmt.Println("Invoice kosong")
 					resultredis_timer, flag_timer := helpers.GetRedis(fieldconfig_redis)
 					jsonredis_timer := []byte(resultredis_timer)
+					resultRD, _ := jsonparser.GetString(jsonredis_timer, "result")
 					timeRD, _ := jsonparser.GetInt(jsonredis_timer, "time")
 					invoiceRD, _ := jsonparser.GetString(jsonredis_timer, "invoice")
 
 					if flag_timer {
 						fmt.Println("TIMER_ CACHE")
+
+						data_send = "|0|" + time_status + "|" + game_status + "|" + resultRD
+						data_send_agen = invoice_agen + "|OPEN"
+						fmt.Printf("%s:%.2d:%s:%s:%s\n", invoice, time_game%60, time_status, game_status, game_result)
+						senddata(data_send, envCompany)
+						time.Sleep(3 * time.Second)
+
 						time_game = int(timeRD)
 						invoice = invoiceRD
 						invoice_agen = ""
@@ -186,6 +190,8 @@ func main() {
 						data_send_agen = invoice_agen + "|CLOSED"
 						senddata_agen(data_send_agen, envCompany)
 					} else {
+						invoice = Save_transaksi(strings.ToLower(envCompany), envCurr)
+						invoice_agen = invoice
 						data_send_agen = invoice_agen + "|OPEN"
 						senddata_agen(data_send_agen, envCompany)
 					}
