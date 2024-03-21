@@ -9,7 +9,7 @@ import (
 	s "strings"
 	"time"
 
-	"github.com/nikitamirzani323/wigo_engine_timer/configs"
+	"bitbucket.org/isbtotogroup/wigo_engine_timer_cron/configs"
 	"golang.org/x/crypto/bcrypt"
 )
 

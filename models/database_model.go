@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/nikitamirzani323/wigo_engine_timer/configs"
-	"github.com/nikitamirzani323/wigo_engine_timer/db"
-	"github.com/nikitamirzani323/wigo_engine_timer/helpers"
+	"bitbucket.org/isbtotogroup/wigo_engine_timer_cron/configs"
+	"bitbucket.org/isbtotogroup/wigo_engine_timer_cron/db"
+	"bitbucket.org/isbtotogroup/wigo_engine_timer_cron/helpers"
 )
 
 func Get_counter(field_column string) int {

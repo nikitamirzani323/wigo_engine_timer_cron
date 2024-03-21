@@ -1,4 +1,4 @@
-module github.com/nikitamirzani323/wigo_engine_timer
+module bitbucket.org/isbtotogroup/wigo_engine_timer_cron
 
 go 1.19
 

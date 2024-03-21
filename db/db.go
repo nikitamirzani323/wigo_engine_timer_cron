@@ -7,8 +7,8 @@ import (
 	"os"
 	"time"
 
+	"bitbucket.org/isbtotogroup/wigo_engine_timer_cron/helpers"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-	"github.com/nikitamirzani323/wigo_engine_timer/helpers"
 )
 
 var db *sql.DB
