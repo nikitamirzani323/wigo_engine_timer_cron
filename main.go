@@ -49,7 +49,7 @@ func main() {
 	envCompany := os.Getenv("DB_CONF_COMPANY")
 	envCurr := os.Getenv("DB_CONF_CURR")
 	time_game := 0
-	fieldconfig_redis := "CONFIG_" + strings.ToLower(envCompany)
+	fieldconfig_redis := strings.ToLower(envCompany) + ":12D30S:CONFIG_TIMER"
 
 	type Configure struct {
 		Time        int    `json:"time"`
@@ -65,7 +65,7 @@ func main() {
 	operatorRD, _ := jsonparser.GetString(jsonredis, "operator")
 
 	if !flag_config {
-		fmt.Println("CONFIG DATABASE")
+		fmt.Println("ENGINE TIMER CONFIG DATABASE")
 		time_game_DB, game_status_DB, operator_DB := _GetConf(envCompany)
 		obj.Time = time_game_DB
 		obj.Maintenance = game_status_DB
@@ -76,7 +76,7 @@ func main() {
 		operator_status = operator_DB
 
 	} else {
-		fmt.Println("CONFIG CACHE")
+		fmt.Println("ENGINE TIMER CONFIG CACHE")
 		time_game = int(timeRD)
 		game_status = maintenanceRD
 		operator_status = operatorRD
