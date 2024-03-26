@@ -165,8 +165,8 @@ func main() {
 					}
 				} else { // dengan operator
 					fmt.Println("ONLINE OPERATOR")
-					fieldconfig_redis := "TIMER_" + strings.ToLower(envCompany)
-					resultredis_timer, flag_timer := helpers.GetRedis(fieldconfig_redis)
+					fieldconfigoperator_redis := strings.ToLower(envCompany) + ":12D30S:TIMER"
+					resultredis_timer, flag_timer := helpers.GetRedis(fieldconfigoperator_redis)
 					jsonredis_timer := []byte(resultredis_timer)
 					resultRD, _ := jsonparser.GetString(jsonredis_timer, "result")
 					timeRD, _ := jsonparser.GetInt(jsonredis_timer, "time")
@@ -184,7 +184,7 @@ func main() {
 						time_game = int(timeRD)
 						invoice = invoiceRD
 						invoice_agen = ""
-						val_transaksi2d30s2 := helpers.DeleteRedis(fieldconfig_redis)
+						val_transaksi2d30s2 := helpers.DeleteRedis(fieldconfigoperator_redis)
 						fmt.Printf("Redis Delete TIMER : %d", val_transaksi2d30s2)
 
 						data_send_agen = invoice_agen + "|CLOSED"
