@@ -1,8 +1,8 @@
 version: '2'
 
 services:
-  engine-timer-12d:
-    container_name: engine-timer-12d
-    image: engine-timer-12d:0.0.1
+  wigo-engine-timer-12d:
+    container_name: wigo-engine-timer-12d
+    image: wigo-engine-timer-12d:0.0.1
     build: .
     restart: always
