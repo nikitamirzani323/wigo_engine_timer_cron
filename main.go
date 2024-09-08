@@ -88,7 +88,7 @@ func main() {
 		time_game = 0
 	}
 	s := gocron.NewScheduler(local)
-	s.Every(1).Seconds().Do(func() {
+	s.Every(2).Seconds().Do(func() {
 		resultredis, flag_config := helpers.GetRedis(fieldconfig_redis)
 		jsonredis := []byte(resultredis)
 		maintenanceRD, _ := jsonparser.GetString(jsonredis, "maintenance")
