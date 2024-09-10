@@ -88,7 +88,7 @@ func main() {
 		time_game = 0
 	}
 	s := gocron.NewScheduler(local)
-	s.Every(2).Seconds().Do(func() {
+	s.Every(1).Seconds().Do(func() {
 		resultredis, flag_config := helpers.GetRedis(fieldconfig_redis)
 		jsonredis := []byte(resultredis)
 		maintenanceRD, _ := jsonparser.GetString(jsonredis, "maintenance")
@@ -127,40 +127,43 @@ func main() {
 
 				if operator_status == "N" { // tanpa operator
 					fmt.Println("ONLINE AUTOMATION")
-					// prize_2D := helpers.Shuffle_nomor()
-					game_result = helpers.Shuffle_nomor()
-					data_send = invoice + "|0|" + time_status + "|" + game_status + "|" + game_result
-					data_send_agen = invoice_agen + "|OPEN"
-					fmt.Printf("%s:%.2d:%s:%s:%s\n", invoice, time_game%60, time_status, game_status, game_result)
-					senddata(data_send, envCompany)
+					if game_result == "" {
+						game_result = helpers.Shuffle_nomor()
+						data_send = invoice + "|0|" + time_status + "|" + game_status + "|" + game_result
+						data_send_agen = invoice_agen + "|OPEN"
+						fmt.Printf("%s:%.2d:%s:%s:%s\n", invoice, time_game%60, time_status, game_status, game_result)
+						senddata(data_send, envCompany)
 
-					flag_compiledata = Update_transaksi(strings.ToLower(envCompany), game_result)
-					time.Sleep(3 * time.Second)
-					if flag_compiledata {
-						invoice = Save_transaksi(strings.ToLower(envCompany), envCurr)
-						invoice_agen = invoice
+						flag_compiledata = Update_transaksi(strings.ToLower(envCompany), game_result)
+						time.Sleep(3 * time.Second)
+						// time.Sleep(3 * time.Second)
+						if flag_compiledata {
+							invoice = Save_transaksi(strings.ToLower(envCompany), envCurr)
+							invoice_agen = invoice
 
-						resultredis, flag_config := helpers.GetRedis(fieldconfig_redis)
-						jsonredis := []byte(resultredis)
-						timeRD, _ := jsonparser.GetInt(jsonredis, "time")
-						maintenanceRD, _ := jsonparser.GetString(jsonredis, "maintenance")
-						operatorRD, _ := jsonparser.GetString(jsonredis, "operator")
+							resultredis, flag_config := helpers.GetRedis(fieldconfig_redis)
+							jsonredis := []byte(resultredis)
+							timeRD, _ := jsonparser.GetInt(jsonredis, "time")
+							maintenanceRD, _ := jsonparser.GetString(jsonredis, "maintenance")
+							operatorRD, _ := jsonparser.GetString(jsonredis, "operator")
 
-						if !flag_config {
-							fmt.Println("CONFIG DATABASE")
-							time_game_DB, game_status_DB, operator_DB := _GetConf(envCompany)
-							obj.Time = time_game_DB
-							obj.Maintenance = game_status_DB
-							obj.Operator = operator_DB
-							helpers.SetRedis(fieldconfig_redis, obj, 60*time.Minute)
-							time_game = time_game_DB
-							game_status = game_status_DB
+							if !flag_config {
+								fmt.Println("CONFIG DATABASE")
+								time_game_DB, game_status_DB, operator_DB := _GetConf(envCompany)
+								obj.Time = time_game_DB
+								obj.Maintenance = game_status_DB
+								obj.Operator = operator_DB
+								helpers.SetRedis(fieldconfig_redis, obj, 60*time.Minute)
+								time_game = time_game_DB
+								game_status = game_status_DB
 
-						} else {
-							fmt.Println("CONFIG CACHE")
-							time_game = int(timeRD)
-							game_status = maintenanceRD
-							operator_status = operatorRD
+							} else {
+								fmt.Println("CONFIG CACHE")
+								time_game = int(timeRD)
+								game_status = maintenanceRD
+								operator_status = operatorRD
+							}
+							game_result = ""
 						}
 					}
 				} else { // dengan operator
